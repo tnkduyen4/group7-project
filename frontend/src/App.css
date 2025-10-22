@@ -1,0 +1,73 @@
+/* Tổng thể app */
+.app-container {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* Tiêu đề */
+.app-title {
+  text-align: center;
+  color: #007bff;
+  margin-bottom: 20px;
+}
+
+/* Form thêm user */
+.adduser-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.adduser-form input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.adduser-form button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.adduser-form button:hover {
+  background: #0056b3;
+}
+
+/* Bảng người dùng */
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.user-table th {
+  background: #007bff;
+  color: white;
+  padding: 8px;
+}
+
+.user-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.user-table tr:nth-child(even) {
+  background: #f2f2f2;
+}
+
+/* Khi chưa có user */
+.empty-message {
+  text-align: center;
+  color: #777;
+  font-style: italic;
+}
