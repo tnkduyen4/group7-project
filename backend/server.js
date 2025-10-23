@@ -1,33 +1,34 @@
-// server.js
 const express = require('express');
-const cors = require('cors');
 const mongoose = require('mongoose');
-require('dotenv').config();
+require('dotenv').config(); // Đọc file .env
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+app.use(express.json());
 
-// ====== KẾT NỐI MONGODB ATLAS ======
+// ======= Kết nối MongoDB Atlas =======
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ Đã kết nối MongoDB Atlas thành công!'))
-  .catch(err => console.error('❌ Lỗi kết nối MongoDB:', err));
+  .then(() => console.log("✅ Connected to MongoDB Atlas"))
+  .catch(err => console.error("❌ MongoDB connection error:", err));
 
-// ====== IMPORT ROUTES ======
-const userRoutes = require('./routes/user');
+// ======= Import Model =======
+const User = require('./models/User');
 
-// ====== MIDDLEWARE ======
-app.use(cors());           // Cho phép React frontend gọi API
-app.use(express.json());   // Cho phép server đọc JSON từ body
+// ======= Routes =======
 
-// ====== ROUTES ======
-app.use('/', userRoutes);
-
-// Root endpoint
-app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to User Management API' });
+// Lấy tất cả user
+app.get('/users', async (req, res) => {
+  const users = await User.find();
+  res.json(users);
 });
 
-// ====== KHỞI ĐỘNG SERVER ======
-app.listen(PORT, () => {
-  console.log(`🚀 Server đang chạy tại http://localhost:${PORT}`);
+// Thêm user mới
+app.post('/users', async (req, res) => {
+  const { name, email } = req.body;
+  const newUser = new User({ name, email });
+  await newUser.save();
+  res.json(newUser);
 });
+
+// ======= Khởi động server =======
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
