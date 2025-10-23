@@ -19,32 +19,11 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Connected to MongoDB Atlas"))
   .catch(err => console.error("❌ MongoDB connection error:", err));
 
-// ======= Import Model =======
-const User = require('./models/User');
+// ======= Import Routes =======
+const userRoutes = require('./routes/user');
 
-// ======= Routes =======
-
-// Lấy tất cả user
-app.get('/users', async (req, res) => {
-  try {
-    const users = await User.find();
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ error: 'Lỗi server khi lấy danh sách người dùng' });
-  }
-});
-
-// Thêm user mới
-app.post('/users', async (req, res) => {
-  try {
-    const { name, email } = req.body;
-    const newUser = new User({ name, email });
-    await newUser.save();
-    res.json(newUser);
-  } catch (error) {
-    res.status(500).json({ error: 'Lỗi server khi thêm người dùng' });
-  }
-});
+// ======= Sử dụng Routes =======
+app.use('/', userRoutes);
 
 // ======= Khởi động server =======
 const PORT = process.env.PORT || 3000;
