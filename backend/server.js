@@ -13,7 +13,7 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error('❌ Lỗi kết nối MongoDB:', err));
 
 // ====== IMPORT ROUTES ======
-const userRoutes = require('./routes/user');
+const userRoutes = require('./models/User');
 
 // ====== MIDDLEWARE ======
 app.use(cors());           // Cho phép React frontend gọi API
