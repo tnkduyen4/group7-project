@@ -7,7 +7,7 @@ const app = express();
 
 // 👇 Thêm CORS trước các route
 app.use(cors({
-  origin: 'http://localhost:3001', // Cho phép frontend React truy cập
+  origin: 'http://localhost:3001', 
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
@@ -21,11 +21,14 @@ mongoose.connect(process.env.MONGO_URI)
 
 // ======= Import Routes =======
 const userRoutes = require('./routes/user');
-const authRoutes = require('./routes/auth'); // 👈 Thêm dòng này
+const authRoutes = require('./routes/auth'); 
+const profileRoutes = require('./routes/profile');
+
 
 // ======= Sử dụng Routes =======
 app.use('/', userRoutes);
-app.use('/auth', authRoutes); // 👈 Thêm dòng này
+app.use('/auth', authRoutes); 
+app.use('/profile', profileRoutes);
 
 // ======= Khởi động server =======
 const PORT = process.env.PORT || 3000;
