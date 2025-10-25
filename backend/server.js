@@ -21,9 +21,11 @@ mongoose.connect(process.env.MONGO_URI)
 
 // ======= Import Routes =======
 const userRoutes = require('./routes/user');
+const authRoutes = require('./routes/auth'); // 👈 Thêm dòng này
 
 // ======= Sử dụng Routes =======
 app.use('/', userRoutes);
+app.use('/auth', authRoutes); // 👈 Thêm dòng này
 
 // ======= Khởi động server =======
 const PORT = process.env.PORT || 3000;
