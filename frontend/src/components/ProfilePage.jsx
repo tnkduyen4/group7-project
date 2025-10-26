@@ -73,9 +73,9 @@ function ProfilePage() {
 
     try {
       const fd = new FormData();
-      fd.append('file', file);
+      fd.append('avatar', file);
 
-      const { data } = await axios.post('/upload', fd, {
+      const { data } = await axios.post('/profile/avatar', fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: (pe) => { if (pe.total) setProgress(Math.round((pe.loaded * 100) / pe.total)); }
       });
