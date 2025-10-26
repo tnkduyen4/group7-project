@@ -75,7 +75,7 @@ function ProfilePage() {
       const fd = new FormData();
       fd.append('file', file);
 
-      const { data } = await axios.post('/upload', fd, {
+      const { data } = await axios.post('/profile/upload', fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: (pe) => { if (pe.total) setProgress(Math.round((pe.loaded * 100) / pe.total)); }
       });
@@ -122,7 +122,7 @@ setViewUser(data.user);
       <div className="profile-avatar">
         <img
           className="profile-avatar-img"
-          src={viewUser.avatar || 'https://via.placeholder.com/120x120?text=avatar'}
+          src={viewUser?.avatar || 'https://placehold.co/120x120?text=avatar'}
           alt="avatar"
         />
         <div className="profile-avatar-actions">
