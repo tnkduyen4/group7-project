@@ -7,7 +7,7 @@ const app = express();
 
 // 👇 Thêm CORS trước các route
 app.use(cors({
-  origin: 'http://localhost:3001', 
+  origin: 'http://localhost:3001', // Cho phép frontend React truy cập
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
@@ -29,6 +29,10 @@ const profileRoutes = require('./routes/profile');
 app.use('/', userRoutes);
 app.use('/auth', authRoutes); 
 app.use('/profile', profileRoutes);
+=======
+
+// ======= Sử dụng Routes =======
+app.use('/', userRoutes);
 
 // ======= Khởi động server =======
 const PORT = process.env.PORT || 3000;
