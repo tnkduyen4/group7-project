@@ -116,3 +116,18 @@
 
 /* Thanh nút trên cùng */
 .toolbar { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 10px; }
+/* gợi ý, tự chỉnh theo UI của bạn */
+.profile {}
+.profile-avatar { text-align: center; margin-bottom: 16px; }
+.profile-avatar-img { width:120px; height:120px; border-radius:50%; object-fit:cover; border:1px solid #eee; }
+.profile-avatar-actions { margin-top: 8px; }
+.profile-file-input { display:none; }
+
+/* progress */
+.upload-progress { width:220px; height:6px; border-radius:4px; background:#eee; margin:8px auto 0; overflow:hidden; }
+.upload-progress-bar { height:100%; background:#409eff; }
+
+/* table/form spacing */
+.profile-table { margin-bottom: 20px; }
+.profile-form .btn { margin-right: 8px; }
+.upload-message, .profile-message { margin-top: 8px; }

@@ -5,6 +5,8 @@ import RegisterForm from './components/RegisterForm';
 import LoginForm from './components/LoginForm';
 import ProfilePage from './components/ProfilePage';
 import AdminPage from './components/AdminPage';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 import axios from 'axios';
 
 // ===== axios defaults =====
@@ -19,6 +21,7 @@ function App() {
   const [role,  setRole]  = useState(localStorage.getItem('role'));
   const [page,  setPage]  = useState('login');
   const [booting, setBooting] = useState(true);
+  const [resetToken, setResetToken] = useState(''); // token reset từ URL
 
   // Lần đầu vào app: có token nhưng thiếu role -> gọi /profile để hydrate
   useEffect(() => {
@@ -34,7 +37,7 @@ function App() {
             r = data?.role || 'user';
             localStorage.setItem('role', r);
           } catch {
-            // token không hợp lệ
+            // token không hợp lệ -> xoá sạch
             localStorage.clear();
           }
         }
@@ -49,6 +52,16 @@ function App() {
       setBooting(false);
     };
     hydrate();
+  }, []);
+
+  // Bắt token reset từ URL (?token=...)
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    const t = q.get('token');
+    if (t) {
+      setResetToken(t);
+      setPage('reset');
+    }
   }, []);
 
   // Khi token đổi (login/log out) -> cập nhật header + trang mặc định
@@ -75,8 +88,7 @@ function App() {
     setRole(null);
     setPage('login');
   };
-
-  if (booting) return <div className="app-container"><p>Đang khởi tạo...</p></div>;
+if (booting) return <div className="app-container"><p>Đang khởi tạo...</p></div>;
 
   return (
     <div className="app-container">
@@ -86,11 +98,14 @@ function App() {
         <>
           {page === 'login' ? (
             <>
-              {/* Truyền setRole + setPage để cập nhật ngay sau login */}
-              <LoginForm setToken={setToken} onLogged={(r) => {
-                setRole(r);
-                setPage(r === 'admin' ? 'admin' : 'profile');
-              }} />
+              <LoginForm
+                setToken={setToken}
+                onLogged={(r) => {
+                  setRole(r);
+                  setPage(r === 'admin' ? 'admin' : 'profile');
+                }}
+                onForgot={() => setPage('forgot')}
+              />
               <p>
                 Chưa có tài khoản?{' '}
                 <button onClick={() => setPage('register')} className="btn btn-link">
@@ -98,7 +113,7 @@ function App() {
                 </button>
               </p>
             </>
-          ) : (
+          ) : page === 'register' ? (
             <>
               <RegisterForm />
               <p>
@@ -108,7 +123,15 @@ function App() {
                 </button>
               </p>
             </>
-          )}
+          ) : page === 'forgot' ? (
+            <>
+              <ForgotPassword onBack={() => setPage('login')} />
+            </>
+          ) : page === 'reset' ? (
+            <>
+              <ResetPassword presetToken={resetToken} onBack={() => setPage('login')} />
+            </>
+          ) : null}
         </>
       ) : (
         <>
@@ -121,7 +144,9 @@ function App() {
             <button className="btn btn-outline" onClick={() => setPage('profile')}>
               Hồ sơ
             </button>
-            <button className="btn btn-danger" onClick={handleLogout}>Đăng xuất</button>
+            <button className="btn btn-danger" onClick={handleLogout}>
+              Đăng xuất
+            </button>
           </div>
 
           {page === 'admin' && role === 'admin' ? <AdminPage /> : <ProfilePage />}
