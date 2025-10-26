@@ -1,6 +1,7 @@
 // src/components/LoginForm.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
+import ForgotPassword from './ForgotPassword'; // added
 
 // (Tùy chọn) đảm bảo baseURL nếu bạn chưa set trong App.js
 if (!axios.defaults.baseURL) {
@@ -12,6 +13,7 @@ function LoginForm({ setToken, onLogged }) {
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
+  const [showForgot, setShowForgot] = useState(false); // added
 
   const handleChange = (e) => {
     setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
@@ -89,8 +91,21 @@ function LoginForm({ setToken, onLogged }) {
         <button className="btn btn-primary" type="submit" disabled={submitting}>
           {submitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
         </button>
+
+        {/* added forgot password button */}
+        <button
+          type="button"
+          className="btn-link"
+          onClick={() => setShowForgot(true)}
+          style={{ marginTop: 8 }}
+        >
+          Quên mật khẩu?
+        </button>
       </form>
 {!!message && <p className="empty-message" style={{ marginTop: 8 }}>{message}</p>}
+
+      {/* render ForgotPassword modal/component */}
+      {showForgot && <ForgotPassword onClose={() => setShowForgot(false)} />}
     </div>
   );
 }
