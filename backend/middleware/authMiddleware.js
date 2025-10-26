@@ -2,7 +2,7 @@
 const jwt = require('jsonwebtoken');
 
 // Xác thực JWT
-exports.auth = (req, res, next) => {
+module.exports = function authMiddleware(req, res, next) {
   const raw = req.header('Authorization') || '';
   let token = raw.startsWith('Bearer ') ? raw.slice(7) : raw;
   if (!token) token = req.query?.token || req.cookies?.token;
@@ -22,14 +22,14 @@ exports.auth = (req, res, next) => {
 };
 
 // Phân quyền theo role
-exports.requireRole = (...roles) => (req, res, next) => {
+module.exports.requireRole = (...roles) => (req, res, next) => {
   if (!req.userRole || !roles.includes(req.userRole))
     return res.status(403).json({ message: 'Không đủ quyền' });
   return next();
 };
 
 // (Tuỳ chọn) Cho phép admin hoặc chính chủ
-exports.requireSelfOrRole = (role = 'admin') => (req, res, next) => {
+module.exports.requireSelfOrRole = (role = 'admin') => (req, res, next) => {
   const targetId = req.params.id;
   if (req.userRole === role) return next();
   if (targetId && String(targetId) === String(req.userId)) return next();

@@ -1,54 +1,40 @@
-// server.js
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
-require('dotenv').config();
+const cors = require('cors'); // 👈 Thêm dòng này
+require('dotenv').config(); // Đọc file .env
 
 const app = express();
 
+// 👇 Thêm CORS trước các route
 app.use(cors({
-  origin: 'http://localhost:3001', // React
-  methods: ['GET','POST','PUT','DELETE'],
+  origin: 'http://localhost:3001', // Cho phép frontend React truy cập
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
+
 app.use(express.json());
 
-// Kết nối MongoDB
+// ======= Kết nối MongoDB Atlas =======
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ Connected to MongoDB Atlas'))
-  .catch(err => console.error('❌ MongoDB connection error:', err));
+  .then(() => console.log("✅ Connected to MongoDB Atlas"))
+  .catch(err => console.error("❌ MongoDB connection error:", err));
 
-// ===== Seed admin (chạy 1 lần nếu chưa có) =====
-const bcrypt = require('bcryptjs');
-const User = require('./models/User');
-(async () => {
-  try {
-    const email = process.env.ADMIN_EMAIL || 'admin@demo.com';
-    const pass  = process.env.ADMIN_PASS  || 'Admin@123';
-    const has = await User.findOne({ email });
-    if (!has) {
-      const hash = await bcrypt.hash(pass, 10);
-      await User.create({ name: 'Admin', email, password: hash, role: 'admin' });
-      console.log('✅ Seeded admin:', email);
-    }
-  } catch (e) {
-    console.log('⚠️ Seed admin error:', e.message);
-  }
-})();
+// ======= Import Routes =======
+const userRoutes = require('./routes/user');
+const authRoutes = require('./routes/auth'); 
+const profileRoutes = require('./routes/profile');
 
-// Routes
-const authRoutes  = require('./routes/auth');
-const adminRoutes = require('./routes/admin');
-// (Nếu còn legacy userRoutes GET /users công khai → tạm bỏ hoặc mount sau)
-try {
-  const userRoutes = require('./routes/user'); // nếu có
-  app.use('/', adminRoutes);   // ƯU TIÊN ADMIN (bảo vệ /users)
-  app.use('/auth', authRoutes);
-  app.use('/', userRoutes);    // legacy (nếu còn), có thể gây trùng route
-} catch {
-  app.use('/', adminRoutes);
-  app.use('/auth', authRoutes);
-}
 
+
+// ======= Sử dụng Routes =======
+app.use('/', userRoutes);
+app.use('/auth', authRoutes); 
+app.use('/profile', profileRoutes);
+
+
+// ======= Sử dụng Routes =======
+app.use('/', userRoutes);
+
+// ======= Khởi động server =======
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
