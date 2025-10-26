@@ -29,7 +29,6 @@ const profileRoutes = require('./routes/profile');
 app.use('/', userRoutes);
 app.use('/auth', authRoutes); 
 app.use('/profile', profileRoutes);
-=======
 
 // ======= Sử dụng Routes =======
 app.use('/', userRoutes);
