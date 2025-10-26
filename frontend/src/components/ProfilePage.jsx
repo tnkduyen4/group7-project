@@ -1,5 +1,5 @@
 // src/components/ProfilePage.jsx
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 
 function ProfilePage() {
@@ -16,19 +16,22 @@ function ProfilePage() {
   const safeSetMsg = (text) => { setMsg(text); if (text) setTimeout(()=>setMsg(''), 3000); };
   const safeSetUpMsg = (text) => { setUpMsg(text); if (text) setTimeout(()=>setUpMsg(''), 3000); };
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       const { data } = await axios.get('/profile');
-      setViewUser(data);
-      setForm({ name: data?.name || '', email: data?.email || '' });
+      // server may return user object directly or wrapped; normalize:
+      const user = data?.user || data;
+      setViewUser(user);
+      setForm({ name: user?.name || '', email: user?.email || '' });
     } catch (e) {
       if (e?.response?.status === 401) { localStorage.clear(); window.location.reload(); return; }
       safeSetMsg(e?.response?.data?.message || 'Không tải được hồ sơ');
     } finally {
       setLoading(false);
     }
-  };
-  useEffect(() => { load(); }, []);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
 
   const handleChange = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
@@ -76,16 +79,27 @@ function ProfilePage() {
       fd.append('avatar', file);
 
       const { data } = await axios.post('/profile/avatar', fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        // không set Content-Type trực tiếp -> browser/axios set boundary
         onUploadProgress: (pe) => { if (pe.total) setProgress(Math.round((pe.loaded * 100) / pe.total)); }
       });
 
-      if (data?.user) {
-setViewUser(data.user);
-      } else {
-        const url = data.url || data.secure_url;
-        if (url) setViewUser((u) => ({ ...u, avatar: url }));
+      // Normalize URL: server may return { user: { avatarUrl } } or { url/secure_url } or { avatarUrl }
+      const newUrl =
+        data?.user?.avatarUrl ||
+        data?.user?.avatar ||
+        data?.avatarUrl ||
+        data?.avatar ||
+        data?.url ||
+        data?.secure_url;
+
+      if (newUrl) {
+        // update state and force reload by adding timestamp to avoid cache
+        setViewUser((u) => ({ ...(u || {}), avatarUrl: `${newUrl}?t=${Date.now()}` }));
+      } else if (data?.user) {
+        // fallback if full user returned
+        setViewUser(data.user);
       }
+
       safeSetUpMsg('Tải avatar thành công');
     } catch (e) {
       if (e?.response?.status === 401) { localStorage.clear(); window.location.reload(); return; }
@@ -114,6 +128,8 @@ setViewUser(data.user);
   if (loading) return <p className="empty-message">Đang tải hồ sơ...</p>;
   if (!viewUser) return <p className="empty-message">Không có dữ liệu hồ sơ.</p>;
 
+  const avatarSrc = viewUser.avatarUrl ? viewUser.avatarUrl : (viewUser.avatar ? viewUser.avatar : 'https://placehold.co/120x120?text=avatar');
+
   return (
     <div className="profile">
       <h2 className="app-title">Hồ sơ cá nhân</h2>
@@ -122,7 +138,7 @@ setViewUser(data.user);
       <div className="profile-avatar">
         <img
           className="profile-avatar-img"
-          src={viewUser.avatar || 'https://placehold.co/120x120?text=avatar'}
+          src={avatarSrc}
           alt="avatar"
         />
         <div className="profile-avatar-actions">
@@ -161,7 +177,7 @@ setViewUser(data.user);
       {/* Form cập nhật */}
       <form className="adduser-form profile-form" onSubmit={handleUpdate}>
         <input name="name" value={form.name} onChange={handleChange} placeholder="Tên" />
-<input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" />
+        <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" />
         <button className="btn btn-primary" type="submit" disabled={!changed || saving}>
           {saving ? 'Đang lưu...' : 'Cập nhật'}
         </button>
