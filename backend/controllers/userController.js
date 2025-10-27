@@ -1,9 +1,11 @@
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 
 // GET /users - Lấy danh sách người dùng
 exports.getUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    // exclude password field
+    const users = await User.find().select('-password');
     res.json(users);
   } catch (error) {
     res.status(500).json({ error: 'Lỗi server khi lấy danh sách người dùng' });
@@ -13,17 +15,33 @@ exports.getUsers = async (req, res) => {
 // POST /users - Thêm người dùng mới
 exports.createUser = async (req, res) => {
   try {
-    const { name, email } = req.body;
-    
+    let { name, email, password } = req.body || {};
+
     // Validation
     if (!name || !email) {
-      return res.status(400).json({ error: 'Thiếu thông tin người dùng' });
+      return res.status(400).json({ error: 'Thiếu thông tin người dùng (name, email)' });
     }
 
-    const newUser = new User({ name, email });
+    // If password not provided, generate a temporary one
+    if (!password) {
+      password = Math.random().toString(36).slice(-8); // temporary password
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+
+    const newUser = new User({ name, email, password: hash });
     await newUser.save();
-    res.status(201).json(newUser);
+
+    const obj = newUser.toObject();
+    delete obj.password;
+
+    res.status(201).json(obj);
   } catch (error) {
+    // handle mongoose validation errors
+    if (error && error.name === 'ValidationError') {
+      return res.status(400).json({ error: error.message });
+    }
+    console.error('[createUser] error:', error);
     res.status(500).json({ error: 'Lỗi server khi thêm người dùng' });
   }
 };
