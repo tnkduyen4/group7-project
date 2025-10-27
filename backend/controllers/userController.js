@@ -1,30 +1,68 @@
-// Mảng tạm lưu users (chưa dùng database)
-let users = [
-  { id: 1, name: 'Nguyễn Văn A', email: 'a@gmail.com' },
-  { id: 2, name: 'Trần Thị B', email: 'b@gmail.com' }
-];
+const User = require('../models/User');
 
 // GET /users - Lấy danh sách người dùng
-exports.getUsers = (req, res) => {
-  res.json(users);
+exports.getUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: 'Lỗi server khi lấy danh sách người dùng' });
+  }
 };
 
 // POST /users - Thêm người dùng mới
-exports.createUser = (req, res) => {
-  const { name, email } = req.body;
-  
-  // Validation
-  if (!name || !email) {
-    return res.status(400).json({ error: 'Thiếu thông tin người dùng' });
+exports.createUser = async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    
+    // Validation
+    if (!name || !email) {
+      return res.status(400).json({ error: 'Thiếu thông tin người dùng' });
+    }
+
+    const newUser = new User({ name, email });
+    await newUser.save();
+    res.status(201).json(newUser);
+  } catch (error) {
+    res.status(500).json({ error: 'Lỗi server khi thêm người dùng' });
   }
+};
 
-  // Tạo user mới với ID tự động tăng
-  const newUser = {
-    id: users.length ? users[users.length - 1].id + 1 : 1,
-    name,
-    email
-  };
+// PUT /users/:id - Sửa user
+exports.updateUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email } = req.body;
+    
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { name, email },
+      { new: true, runValidators: true }
+    );
+    
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ error: 'Lỗi server khi cập nhật người dùng' });
+  }
+};
 
-  users.push(newUser);
-  res.status(201).json(newUser);
+// DELETE /users/:id - Xóa user
+exports.deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const deletedUser = await User.findByIdAndDelete(id);
+    
+    if (!deletedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: 'Lỗi server khi xóa người dùng' });
+  }
 };

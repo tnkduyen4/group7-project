@@ -1,8 +1,17 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const cors = require('cors'); // 👈 Thêm dòng này
 require('dotenv').config(); // Đọc file .env
 
 const app = express();
+
+// 👇 Thêm CORS trước các route
+app.use(cors({
+  origin: 'http://localhost:3001', // Cho phép frontend React truy cập
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
+
 app.use(express.json());
 
 // ======= Kết nối MongoDB Atlas =======
@@ -10,24 +19,20 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Connected to MongoDB Atlas"))
   .catch(err => console.error("❌ MongoDB connection error:", err));
 
-// ======= Import Model =======
-const User = require('./models/User');
+// ======= Import Routes =======
+const userRoutes = require('./routes/user');
+const authRoutes = require('./routes/auth'); 
+const profileRoutes = require('./routes/profile');
 
-// ======= Routes =======
 
-// Lấy tất cả user
-app.get('/users', async (req, res) => {
-  const users = await User.find();
-  res.json(users);
-});
 
-// Thêm user mới
-app.post('/users', async (req, res) => {
-  const { name, email } = req.body;
-  const newUser = new User({ name, email });
-  await newUser.save();
-  res.json(newUser);
-});
+
+// ======= Sử dụng Routes =======
+app.use('/', userRoutes);
+app.use('/auth', authRoutes); 
+app.use('/profile', profileRoutes);
+
+
 
 // ======= Khởi động server =======
 const PORT = process.env.PORT || 3000;
