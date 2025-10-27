@@ -7,7 +7,7 @@ const app = express();
 
 // 👇 Thêm CORS trước các route
 app.use(cors({
-  origin: 'http://localhost:3001', // Cho phép frontend React truy cập
+  origin: process.env.CLIENT_URL || 'http://localhost:3001', // Cho phép frontend React truy cập
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
