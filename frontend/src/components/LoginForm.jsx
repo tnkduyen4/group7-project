@@ -5,7 +5,7 @@ import ForgotPassword from './ForgotPassword'; // added
 
 // (Tùy chọn) đảm bảo baseURL nếu bạn chưa set trong App.js
 if (!axios.defaults.baseURL) {
-  axios.defaults.baseURL = 'http://localhost:3000';
+  axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'https://group7project.onrender.com';
 }
 
 function LoginForm({ setToken, onLogged }) {
