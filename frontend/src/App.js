@@ -17,11 +17,17 @@ if (bootToken) {
 }
 
 function App() {
+  // <-- read reset token from URL synchronously so initial state respects it
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialResetToken = urlParams.get('token') || '';
+  const initialPageFromUrl = initialResetToken ? 'reset' : 'login';
+
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [role,  setRole]  = useState(localStorage.getItem('role'));
-  const [page,  setPage]  = useState('login');
+  // use URL-derived initial page so /reset?token=... hiển thị luôn form reset
+  const [page,  setPage]  = useState(initialPageFromUrl);
   const [booting, setBooting] = useState(true);
-  const [resetToken, setResetToken] = useState(''); // token reset từ URL
+  const [resetToken, setResetToken] = useState(initialResetToken); // token reset từ URL
 
   // Lần đầu vào app: có token nhưng thiếu role -> gọi /profile để hydrate
   useEffect(() => {
@@ -38,7 +44,9 @@ function App() {
             localStorage.setItem('role', r);
           } catch {
             // token không hợp lệ -> xoá sạch
-            localStorage.clear();
+            // chỉ xoá token/role, giữ các key khác nếu cần
+            localStorage.removeItem('token');
+            localStorage.removeItem('role');
           }
         }
       }
@@ -48,7 +56,15 @@ function App() {
 
       setToken(finalToken);
       setRole(finalRole);
-      setPage(finalToken ? (finalRole === 'admin' ? 'admin' : 'profile') : 'login');
+
+      // Nếu URL có token reset ban đầu thì giữ trang reset, không ghi đè
+      if (initialResetToken) {
+        setPage('reset');
+        setResetToken(initialResetToken);
+      } else {
+        setPage(finalToken ? (finalRole === 'admin' ? 'admin' : 'profile') : 'login');
+      }
+
       setBooting(false);
     };
     hydrate();
@@ -74,9 +90,12 @@ function App() {
     } else {
       delete axios.defaults.headers.common['Authorization'];
       setRole(null);
-      setPage('login');
+      // Nếu đang có resetToken (mở từ email), không chuyển về login
+      if (!resetToken) {
+        setPage('login');
+      }
     }
-  }, [token]);
+  }, [token, resetToken]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
