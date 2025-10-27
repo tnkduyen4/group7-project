@@ -5,9 +5,22 @@ require('dotenv').config(); // Đọc file .env
 
 const app = express();
 
-// 👇 Thêm CORS trước các route
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'https://group7-project-snowy.vercel.app'
+];
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3001', // Cho phép frontend React truy cập
+  origin: function (origin, callback) {
+    // Cho phép request không có origin (như Postman)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('❌ Blocked by CORS:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
