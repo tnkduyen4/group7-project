@@ -44,7 +44,9 @@ function App() {
             localStorage.setItem('role', r);
           } catch {
             // token không hợp lệ -> xoá sạch
-            localStorage.clear();
+            // chỉ xoá token/role, giữ các key khác nếu cần
+            localStorage.removeItem('token');
+            localStorage.removeItem('role');
           }
         }
       }
@@ -54,7 +56,15 @@ function App() {
 
       setToken(finalToken);
       setRole(finalRole);
-      setPage(finalToken ? (finalRole === 'admin' ? 'admin' : 'profile') : 'login');
+
+      // Nếu URL có token reset ban đầu thì giữ trang reset, không ghi đè
+      if (initialResetToken) {
+        setPage('reset');
+        setResetToken(initialResetToken);
+      } else {
+        setPage(finalToken ? (finalRole === 'admin' ? 'admin' : 'profile') : 'login');
+      }
+
       setBooting(false);
     };
     hydrate();
@@ -80,9 +90,12 @@ function App() {
     } else {
       delete axios.defaults.headers.common['Authorization'];
       setRole(null);
-      setPage('login');
+      // Nếu đang có resetToken (mở từ email), không chuyển về login
+      if (!resetToken) {
+        setPage('login');
+      }
     }
-  }, [token]);
+  }, [token, resetToken]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
