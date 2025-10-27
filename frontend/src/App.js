@@ -10,7 +10,7 @@ import ResetPassword from './components/ResetPassword';
 import axios from 'axios';
 
 // ===== axios defaults =====
-axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
+axios.defaults.baseURL = process.env.REACT_APP_API_URL || 'https://group7project.onrender.com';
 const bootToken = localStorage.getItem('token');
 if (bootToken) {
   axios.defaults.headers.common['Authorization'] = `Bearer ${bootToken}`;
