@@ -4,49 +4,51 @@ import AddUser from './AddUser';
 
 export default function UserList() {
   const [users, setUsers] = useState([]);
-  const [editingUser, setEditingUser] = useState(null); // user đang được sửa
+  const [editingUser, setEditingUser] = useState(null); // 👈 user đang sửa
+  const role = localStorage.getItem('role');
 
-  // Lấy danh sách user
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/users');
-      setUsers(res.data);
+      const res = await axios.get('/users');   // Authorization đã gắn ở App.js
+      setUsers(res.data || []);
     } catch (err) {
-      console.error('Lỗi khi lấy dữ liệu người dùng:', err);
+      alert(err?.response?.data?.message || 'Không đủ quyền');
+      setUsers([]);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    if (role === 'admin') fetchUsers();
+  }, [role]);
 
-  // Hàm xử lý xóa user
+  if (role !== 'admin') return null; // user thường: không render danh sách
+
   const handleDelete = async (id) => {
-    if (window.confirm('Bạn có chắc muốn xóa người dùng này không?')) {
-      try {
-        await axios.delete(`http://localhost:3000/users/${id}`);
-        setUsers(users.filter((u) => u._id !== id));
-      } catch (err) {
-        console.error('Lỗi khi xóa người dùng:', err);
-      }
+    if (!window.confirm('Bạn có chắc muốn xoá?')) return;
+    try {
+      await axios.delete(`/users/${id}`);
+      setUsers((list) => list.filter(u => u._id !== id));
+      // nếu đang sửa đúng user đó thì hủy chế độ sửa
+      if (editingUser && editingUser._id === id) setEditingUser(null);
+    } catch (e) {
+      alert(e?.response?.data?.message || 'Xoá thất bại');
     }
   };
 
-  // Hàm chọn user để sửa
-  const handleEdit = (user) => {
-    setEditingUser(user);
-  };
+  const handleEditClick = (u) => setEditingUser(u);
+  const handleCancelEdit = () => setEditingUser(null);
 
-  // Khi form thêm/sửa xong thì reload lại danh sách
-  const handleSaved = () => {
+  const handleSaved = async () => {
     setEditingUser(null);
-    fetchUsers();
+    await fetchUsers();
   };
 
   return (
     <div className="userlist-container">
-      <h2>Danh sách người dùng</h2>
-      <AddUser onAdded={handleSaved} editingUser={editingUser} />
+      <h2>Danh sách người dùng (Admin)</h2>
+
+      {/* Form thêm/sửa dùng chung */}
+      <AddUser onAdded={handleSaved} editingUser={editingUser} onCancel={handleCancelEdit} />
 
       {users.length === 0 ? (
         <p className="empty-message">Chưa có người dùng nào.</p>
@@ -67,8 +69,12 @@ export default function UserList() {
                 <td>{u.name}</td>
                 <td>{u.email}</td>
                 <td>
-                  <button onClick={() => handleEdit(u)}>Sửa</button>
-                  <button onClick={() => handleDelete(u._id)}>Xóa</button>
+                  <button className="btn btn-outline btn-sm" onClick={() => handleEditClick(u)}>
+                    Sửa
+                  </button>
+                  <button className="btn btn-danger btn-sm" onClick={() => handleDelete(u._id)} style={{ marginLeft: 8 }}>
+                    Xoá
+                  </button>
                 </td>
               </tr>
             ))}

@@ -4,11 +4,14 @@ const router = express.Router();
 const { auth, requireRole, requireSelfOrRole } = require('../middleware/authMiddleware');
 const adminCtrl = require('../controllers/adminController');
 
-// Chỉ ADMIN mới xem danh sách & xóa user
-router.get('/users', auth, requireRole('admin'), adminCtrl.getAllUsers);
+// ADMIN: danh sách / tạo / sửa / xóa
+router.get('/users',        auth, requireRole('admin'), adminCtrl.getAllUsers);
+router.post('/users',       auth, requireRole('admin'), adminCtrl.createUser);
+router.put('/users/:id',    auth, requireRole('admin'), adminCtrl.updateUser);
 router.delete('/users/:id', auth, requireRole('admin'), adminCtrl.deleteUserById);
 
-// (Tuỳ chọn) Cho user tự xóa mình:
-// router.delete('/users/:id', auth, requireSelfOrRole('admin'), adminCtrl.deleteUserById);
+// (TUỲ CHỌN) Cho phép user tự xoá tài khoản của mình (giữ song song xóa của admin)
+router.delete('/users/:id', auth, requireSelfOrRole('admin'), adminCtrl.deleteUserById);
 
 module.exports = router;
+
