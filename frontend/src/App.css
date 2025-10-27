@@ -117,7 +117,6 @@
 /* Thanh nút trên cùng */
 .toolbar { display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 10px; }
 /* gợi ý, tự chỉnh theo UI của bạn */
-.profile {}
 .profile-avatar { text-align: center; margin-bottom: 16px; }
 .profile-avatar-img { width:120px; height:120px; border-radius:50%; object-fit:cover; border:1px solid #eee; }
 .profile-avatar-actions { margin-top: 8px; }
@@ -131,3 +130,38 @@
 .profile-table { margin-bottom: 20px; }
 .profile-form .btn { margin-right: 8px; }
 .upload-message, .profile-message { margin-top: 8px; }
+
+/* Responsive & form polish */
+@media (max-width: 600px) {
+  .app-container { margin: 20px 12px; padding: 16px; }
+  .adduser-form { flex-direction: column; gap: 12px; }
+  .adduser-form input, .adduser-form button { width: 100%; }
+  .toolbar { flex-wrap: wrap; justify-content: center; }
+}
+
+/* Focus & accessibility */
+.adduser-form input:focus,
+.profile-form input:focus,
+input:focus,
+button:focus {
+  outline: 3px solid rgba(0,123,255,0.15);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(0,123,255,0.08);
+}
+
+/* Disabled button */
+.btn[disabled],
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Reset form */
+.reset-form { max-width: 520px; margin: 0 auto 12px; text-align: left; }
+.reset-form input { width: 100%; margin-bottom: 10px; }
+
+/* Improve empty message contrast */
+.empty-message { color: #5a6168; }
+
+/* Avatar fallback bg */
+.profile-avatar-img { background: #f6f7f9; }
