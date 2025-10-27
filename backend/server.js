@@ -23,15 +23,6 @@ mongoose.connect(process.env.MONGO_URI)
 const userRoutes = require('./routes/user');
 const authRoutes = require('./routes/auth'); 
 const profileRoutes = require('./routes/profile');
-<<<<<<< HEAD
-=======
-
-
-// ======= Sử dụng Routes =======
-app.use('/', userRoutes);
-app.use('/auth', authRoutes); 
-app.use('/profile', profileRoutes);
->>>>>>> frontend
 
 // ======= Sử dụng Routes =======
 app.use('/', userRoutes);
