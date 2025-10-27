@@ -7,15 +7,37 @@ export default function ResetPassword({ presetToken = '', onBack }) {
   const [password, setPassword] = useState('');
   const [msg, setMsg] = useState('');
 
-  useEffect(() => { setToken(presetToken); }, [presetToken]);
+  // if presetToken changes, keep it; if not provided, try to read from URL
+  useEffect(() => {
+    if (presetToken) {
+      setToken(presetToken);
+      console.log('[ResetPassword] using presetToken from props');
+    } else {
+      try {
+        const q = new URLSearchParams(window.location.search);
+        const t = q.get('token');
+        if (t) {
+          setToken(t);
+          console.log('[ResetPassword] token taken from URL:', t);
+        } else {
+          console.log('[ResetPassword] no token in props or URL');
+        }
+      } catch (err) {
+        console.warn('[ResetPassword] cannot parse URL token', err);
+      }
+    }
+  }, [presetToken]);
 
   const submit = async (e) => {
     e.preventDefault();
     setMsg('');
     try {
+      console.log('[ResetPassword] submitting token:', token);
       const { data } = await axios.post('/auth/reset-password', { token, password });
+      console.log('[ResetPassword] reset response:', data);
       setMsg(data.message || 'Đổi mật khẩu thành công. Hãy đăng nhập lại.');
     } catch (e) {
+      console.error('[ResetPassword] submit error:', e?.response || e);
       setMsg(e?.response?.data?.message || 'Đổi mật khẩu thất bại');
     }
   };
