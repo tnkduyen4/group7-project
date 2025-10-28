@@ -2,8 +2,11 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 const User = require('../models/User');
+
+// ===== SendGrid Setup =====
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // ===== Helpers =====
 const signJwt = (u) =>
@@ -14,16 +17,6 @@ const signJwt = (u) =>
   );
 
 const normalizeEmail = (e) => (e || '').trim().toLowerCase();
-
-// Mailer (Mailtrap)
-const mailer = nodemailer.createTransport({
-  host: process.env.MAILTRAP_HOST || 'sandbox.smtp.mailtrap.io',
-  port: Number(process.env.MAILTRAP_PORT || 2525),
-  auth: {
-    user: process.env.MAILTRAP_USER,
-    pass: process.env.MAILTRAP_PASS,
-  },
-});
 
 // ===== Auth Controllers =====
 
@@ -112,9 +105,9 @@ exports.forgotPassword = async (req, res) => {
       (process.env.CLIENT_URL || 'http://localhost:3001') +
       `/reset?token=${rawToken}`;
 
-    await mailer.sendMail({
-      from: process.env.MAIL_FROM || 'no-reply@example.com',
+    await sgMail.send({
       to: email,
+      from: process.env.MAIL_FROM || 'no-reply@example.com',
       subject: 'Đặt lại mật khẩu',
       html: `
         <p>Xin chào ${user.name},</p>
@@ -124,7 +117,7 @@ exports.forgotPassword = async (req, res) => {
       `,
     });
 
-    return res.json({ message: 'Đã gửi email đặt lại mật khẩu (Mailtrap)' });
+    return res.json({ message: 'Đã gửi email đặt lại mật khẩu' });
   } catch (err) {
     return res.status(500).json({ message: 'Lỗi server khi gửi reset', error: err.message });
   }
