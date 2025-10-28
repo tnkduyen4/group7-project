@@ -14,7 +14,14 @@ const allowedOrigins = [
 app.use(cors({
   origin: function (origin, callback) {
     // Cho phép request không có origin (như Postman)
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin) return callback(null, true);
+    
+    // Cho phép localhost và Vercel domains
+    if (
+      origin.includes('localhost') ||
+      origin.includes('vercel.app') ||
+      allowedOrigins.includes(origin)
+    ) {
       callback(null, true);
     } else {
       console.log('❌ Blocked by CORS:', origin);
