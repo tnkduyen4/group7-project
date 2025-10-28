@@ -101,9 +101,18 @@ exports.forgotPassword = async (req, res) => {
     await user.save();
 
     // Link reset (frontend có thể làm 1 trang /reset?token=...)
-    const resetLink =
-      (process.env.CLIENT_URL || 'http://localhost:3001') +
-      `/reset?token=${rawToken}`;
+    // Ưu tiên CLIENT_URL từ env (Render/Vercel). Nếu thiếu, lấy từ Origin/Referer của request.
+    let clientBase = process.env.CLIENT_URL;
+    if (!clientBase) {
+      const o = req.headers.origin || req.headers.referer;
+      try {
+        if (o) clientBase = new URL(o).origin;
+      } catch (_) {
+        // ignore parse errors
+      }
+    }
+    if (!clientBase) clientBase = 'http://localhost:3001';
+    const resetLink = `${clientBase}/reset?token=${rawToken}`;
 
     await sgMail.send({
       to: email,
