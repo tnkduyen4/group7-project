@@ -11,7 +11,8 @@ function RegisterForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:3000/auth/signup", {
+      const API_URL = process.env.REACT_APP_API_URL || 'https://group7project.onrender.com';
+      const res = await fetch(`${API_URL}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
