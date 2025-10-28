@@ -6,7 +6,7 @@ const User = require('../models/User');
 // GET /profile - Lấy thông tin người dùng hiện tại
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const user = await User.findById(req.userId).select('-password');
     res.json(user);
   } catch (error) {
     res.status(500).json({ message: 'Lỗi server' });
@@ -18,7 +18,7 @@ router.put('/', authMiddleware, async (req, res) => {
   try {
     const { name, email } = req.body;
     const user = await User.findByIdAndUpdate(
-      req.user.id,
+      req.userId,
       { name, email },
       { new: true }
     ).select('-password');
@@ -59,7 +59,7 @@ router.post('/avatar', authMiddleware, upload.single('avatar'), async (req, res)
 
     // Sử dụng model User (không phải `user`) và req.user.id (không phải req.userId)
     const updated = await User.findByIdAndUpdate(
-      req.user.id,
+      req.userId,
       { avatarUrl: req.file.path },
       { new: true }
     ).select('-password');
